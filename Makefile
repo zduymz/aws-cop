@@ -1,4 +1,4 @@
-.PHONY: default auth build push clean
+.PHONY: default test config deploy
 .DEFAULT_GOAL := default
 
 FUNC := aws-cloudtrail-watcher
