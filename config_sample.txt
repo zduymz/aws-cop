@@ -1,0 +1,9 @@
+SLACK_WEBHOOK=
+EVENTSOURCE_EC2=ec2.amazonaws.com
+EVENTNAME_EC2_1=^RunInstances$
+EVENTNAME_EC2_2=^Modify.*
+EVENTNAME_EC2_3=^Terminate.*
+IGNOREARN_EC2_1=arn:aws:iam::12345:user/dmai
+IGNOREARN_EC2_2=arn:aws:iam::12345:role/hola
+EVENTSOURCE_IAM=iam.amazonaws.com
+EVENTNAME_IAM_1=^Create.*

@@ -1,0 +1,6 @@
+build/*
+.idea
+vendor/*
+config_env.txt
+.DS_Store
+config.txt
