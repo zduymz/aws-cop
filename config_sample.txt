@@ -1,9 +1,12 @@
-SLACK_WEBHOOK=
-EVENTSOURCE_EC2=ec2.amazonaws.com
-EVENTNAME_EC2_1=^RunInstances$
-EVENTNAME_EC2_2=^Modify.*
-EVENTNAME_EC2_3=^Terminate.*
-IGNOREARN_EC2_1=arn:aws:iam::12345:user/dmai
-IGNOREARN_EC2_2=arn:aws:iam::12345:role/hola
-EVENTSOURCE_IAM=iam.amazonaws.com
-EVENTNAME_IAM_1=^Create.*
+{
+  "Variables": {
+    "SLACK_WEBHOOK": "",
+    "EVENTNAME_DEFAULT_IGNORES": "Get,Describe,List,Head",
+    "USERIDENTITY_DEFAULT_IGNORES": "ecs-tasks.amazonaws.com,ec2.amazonaws.com,monitoring.rds.amazonaws.com,lambda.amazonaws.com",
+    "USERAGENT_DEFAULT_MUSTHAVE": "signin.amazonaws.com,console.amazonaws.com",
+    "USERAGENT_DEFAULT_MUSTHAVEREGEX": "",
+    "EVENTNAME_ec2amazonawscom_IGNORES": "CreateTags",
+    "EVENTNAME_ssmamazonawscom_IGNORES": "Update,Put",
+    "EVENTNAME_stsamazonawscom_IGNORES": "AssumeRole"
+  }
+}

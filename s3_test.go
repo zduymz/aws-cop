@@ -19,7 +19,7 @@ func TestS3Download(t *testing.T) {
 		t.Errorf("failed to create aws session. Reason: %v", err)
 	}
 
-	downloader = Downloader{
+	downloader := Downloader{
 		s3manager.NewDownloader(sess),
 	}
 

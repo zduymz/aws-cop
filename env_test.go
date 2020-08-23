@@ -10,9 +10,9 @@ import (
 
 func setupTest() {
 	for _, kv := range os.Environ() {
-		if strings.HasPrefix(kv, "EVENTSOURCE_") ||
+		if strings.HasPrefix(kv, "USERAGENT_") ||
 			strings.HasPrefix(kv, "EVENTNAME_") ||
-			strings.HasPrefix(kv, "IGNOREARN_") {
+			strings.HasPrefix(kv, "USERIDENTIFY_") {
 			os.Unsetenv(strings.Split(kv, "=")[0])
 		}
 	}
@@ -20,82 +20,33 @@ func setupTest() {
 
 func TestReadEnvFull(t *testing.T) {
 	setupTest()
-	os.Setenv("EVENTSOURCE_EC2", "ec2.amazonaws.com")
-	os.Setenv("EVENTNAME_EC2_1", "^RunInstances$")
-	os.Setenv("EVENTNAME_EC2_2", "^TerminateInstances$")
-	os.Setenv("IGNOREARN_EC2_1", "arn:aws:iam::1234:user/dmai")
-	os.Setenv("IGNOREARN_EC2_2", "arn:aws:sts::1234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling")
+	os.Setenv("EVENTNAME_DEFAULT_IGNORES", "Get,Describe,List,Head,ConsoleLogin")
+	os.Setenv("USERIDENTITY_DEFAULT_IGNORES", "ec2.amazonaws.com")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVE", "console.amazonaws.com")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVEREGEX", "console.*.amazonaws.com,aws-internal*AWSLambdaConsole/*")
 
-	expect := map[string]*ConfigRule{
-		"EC2": {
-			EventSource: "ec2.amazonaws.com",
-			EventNames: []*regexp.Regexp{
-				regexp.MustCompile("^RunInstances$"),
-				regexp.MustCompile("^TerminateInstances$")},
-			IgnoreARNs: []string{"arn:aws:iam::1234:user/dmai", "arn:aws:sts::1234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling"},
+	expect := ConfigRule{
+		EventName: ConfigEventName{
+			Ignores: map[string][]string{
+				"default": {"Get", "Describe", "List", "Head", "ConsoleLogin"},
+			}},
+		UserAgent: ConfigUserAgent{
+			MustHave: map[string][]string{
+				"default": {"console.amazonaws.com"},
+			},
+			MustHaveRegex: map[string][]*regexp.Regexp{
+				"default": {regexp.MustCompile("console.*.amazonaws.com"), regexp.MustCompile("aws-internal*AWSLambdaConsole/*")},
+			},
+		},
+		UserIdentity: ConfigUserIdentity{
+			Ignores: map[string][]string{
+				"default": {"ec2.amazonaws.com"},
+			},
 		},
 	}
 
 	actual := ReadEnv()
 	if !reflect.DeepEqual(expect, actual) {
-		t.Errorf("env parse failed.\nExpected: %v.\nActual: %v", expect["EC2"], actual["EC2"])
-	}
-}
-
-func TestReadEnvMissIgnoreARN(t *testing.T) {
-	setupTest()
-	os.Setenv("EVENTSOURCE_EC2", "ec2.amazonaws.com")
-	os.Setenv("EVENTNAME_EC2_1", "^RunInstances$")
-	os.Setenv("EVENTNAME_EC2_2", "^TerminateInstances$")
-	expect := map[string]*ConfigRule{
-		"EC2": {
-			EventSource: "ec2.amazonaws.com",
-			EventNames: []*regexp.Regexp{
-				regexp.MustCompile("^RunInstances$"),
-				regexp.MustCompile("^TerminateInstances$")},
-			IgnoreARNs: []string{},
-		},
-	}
-
-	actual := ReadEnv()
-	if !reflect.DeepEqual(expect, actual) {
-		t.Errorf("env parse failed.\nExpected: %v.\nActual: %v", expect["EC2"], actual["EC2"])
-	}
-}
-
-func TestReadEnvMissEventName(t *testing.T) {
-	setupTest()
-	os.Setenv("EVENTSOURCE_EC2", "ec2.amazonaws.com")
-	os.Setenv("IGNOREARN_EC2_1", "arn:aws:iam::1234:user/dmai")
-	expect := map[string]*ConfigRule{
-		"EC2": {
-			EventSource: "ec2.amazonaws.com",
-			EventNames:  []*regexp.Regexp{},
-			IgnoreARNs:  []string{"arn:aws:iam::1234:user/dmai"},
-		},
-	}
-
-	actual := ReadEnv()
-	if !reflect.DeepEqual(expect, actual) {
-		t.Errorf("env parse failed.\nExpected: %v.\nActual: %v", expect["EC2"], actual["EC2"])
-	}
-}
-
-func TestReadEnvMissEventSource(t *testing.T) {
-	setupTest()
-	os.Setenv("EVENTNAME_EC2_1", "^RunInstances$")
-	os.Setenv("IGNOREARN_EC2_1", "arn:aws:iam::1234:user/dmai")
-
-	expect := map[string]*ConfigRule{
-		"EC2": {
-			EventSource: "",
-			EventNames: []*regexp.Regexp{regexp.MustCompile("^RunInstances$")},
-			IgnoreARNs: []string{"arn:aws:iam::1234:user/dmai"},
-		},
-	}
-
-	actual := ReadEnv()
-	if !reflect.DeepEqual(expect, actual) {
-		t.Errorf("env parse failed.\nExpected: %v.\nActual: %v", expect["EC2"], actual["EC2"])
+		t.Errorf("env parse failed.\nExpected: %+v.\nActual: %+v", expect, actual)
 	}
 }

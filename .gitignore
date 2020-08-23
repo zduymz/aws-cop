@@ -3,4 +3,4 @@ build/*
 vendor/*
 config_env.txt
 .DS_Store
-config.txt
+config.json

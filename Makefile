@@ -10,9 +10,9 @@ test:
 	go test -v ./...
 
 config:
-	@aws lambda update-function-configuration \
+	aws lambda update-function-configuration \
 	--function-name ${FUNC} \
-	--environment "Variables={`cat config.txt | tr '\n' ','`}"
+	--environment '$(shell cat config.json | tr '\n' ' ')'
 
 deploy:
 	- rm -rf build/linux

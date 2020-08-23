@@ -12,16 +12,14 @@ import (
 )
 
 func TestHandleRequest(t *testing.T) {
-	os.Setenv("EVENTSOURCE_EC2", "ec2.amazonaws.com")
-	os.Setenv("EVENTNAME_EC2_1", "^RunInstances$")
-	os.Setenv("EVENTNAME_EC2_2", "^StartInstances$")
-	os.Setenv("EVENTNAME_EC2_3", "^StartInstances$")
-	os.Setenv("EVENTNAME_EC2_4", "^StopInstances")
-	os.Setenv("EVENTNAME_EC2_5", "^Modify.*")
-	os.Setenv("EVENTNAME_EC2_6", "^Delete.*")
-	os.Setenv("EVENTNAME_EC2_7", "^Update.*")
-	os.Setenv("EVENTNAME_EC2_8", "^Terminate.*")
-	os.Setenv("IGNOREARN_EC2_1", "arn:aws:iam::088921318242:user/dmai")
+	os.Setenv("EVENTNAME_DEFAULT_IGNORES", "Get,Describe,List,Head,ConsoleLogin")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVE", "")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVEREGEX", "")
+	os.Setenv("USERIDENTITY_DEFAULT_IGNORES", "ecs-tasks.amazonaws.com,ec2.amazonaws.com,monitoring.rds.amazonaws.com,lambda.amazonaws.com,AWSServiceRoleForEC2SpotFleet")
+	os.Setenv("EVENTNAME_ec2amazonawscom_IGNORES","CreateTags")
+	os.Setenv("EVENTNAME_ssmamazonawscom_IGNORES","Update,Put")
+	os.Setenv("EVENTNAME_stsamazonawscom_IGNORES","AssumeRole")
+
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-west-2")},
 	)

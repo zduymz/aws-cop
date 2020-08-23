@@ -26,6 +26,7 @@ func (s *Slack) Write(msg string) error {
 		log.Println(msg)
 		return nil
 	}
+
 	slackBody, _ := json.Marshal(SlackRequestBody{Text: fmt.Sprintf("```%s```", msg)})
 	req, err := http.NewRequest(http.MethodPost, s.WebHookUrl, bytes.NewBuffer(slackBody))
 	if err != nil {
@@ -41,12 +42,13 @@ func (s *Slack) Write(msg string) error {
 	}
 
 	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(resp.Body)
-	if err != nil {
+	if _, err = buf.ReadFrom(resp.Body); err != nil {
 		return err
 	}
+
 	if buf.String() != "ok" {
 		return errors.New("Non-OK response returned from Slack")
 	}
+
 	return nil
 }
