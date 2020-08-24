@@ -13,8 +13,8 @@ import (
 
 func TestHandleRequest(t *testing.T) {
 	os.Setenv("EVENTNAME_DEFAULT_IGNORES", "Get,Describe,List,Head,ConsoleLogin")
-	os.Setenv("USERAGENT_DEFAULT_MUSTHAVE", "")
-	os.Setenv("USERAGENT_DEFAULT_MUSTHAVEREGEX", "")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVE", "signin.amazonaws.com,console.amazonaws.com")
+	os.Setenv("USERAGENT_DEFAULT_MUSTHAVEREGEX", ".*")
 	os.Setenv("USERIDENTITY_DEFAULT_IGNORES", "ecs-tasks.amazonaws.com,ec2.amazonaws.com,monitoring.rds.amazonaws.com,lambda.amazonaws.com,AWSServiceRoleForEC2SpotFleet")
 	os.Setenv("EVENTNAME_ec2amazonawscom_IGNORES","CreateTags")
 	os.Setenv("EVENTNAME_ssmamazonawscom_IGNORES","Update,Put")

@@ -124,14 +124,22 @@ func (c *ConfigRule) checkWhitelistEvent(esource, ename string) bool {
 */
 func (c *ConfigRule) checkBlacklistUseragent(esource, useragent string) bool {
 	esource = strings.ReplaceAll(esource, ".", "")
-	for _, reg := range c.UserAgent.MustHaveRegex["default"] {
-		if reg.MatchString(useragent) {
+	for _, ua := range c.UserAgent.MustHave["default"] {
+		if ua == useragent {
 			return true
 		}
 	}
 
-	for _, ua := range c.UserAgent.MustHave["default"] {
-		if ua == useragent {
+	if uas, ok := c.UserAgent.MustHave[esource]; ok {
+		for _, ua := range uas {
+			if ua == useragent {
+				return true
+			}
+		}
+	}
+
+	for _, reg := range c.UserAgent.MustHaveRegex["default"] {
+		if reg.MatchString(useragent) {
 			return true
 		}
 	}
@@ -139,14 +147,6 @@ func (c *ConfigRule) checkBlacklistUseragent(esource, useragent string) bool {
 	if regs, ok := c.UserAgent.MustHaveRegex[esource]; ok {
 		for _, reg := range regs {
 			if reg.MatchString(useragent) {
-				return true
-			}
-		}
-	}
-
-	if uas, ok := c.UserAgent.MustHave[esource]; ok {
-		for _, ua := range uas {
-			if ua == useragent {
 				return true
 			}
 		}

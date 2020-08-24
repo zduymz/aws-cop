@@ -50,7 +50,9 @@ func ReadEnv() ConfigRule {
 				svc := strings.ToLower(raw[1])
 				if strings.HasSuffix(strings.ToLower(raw[2]), "regex") {
 					for _, v := range values {
+						if v != "" {
 						config.UserAgent.MustHaveRegex[svc] = append(config.UserAgent.MustHaveRegex[svc], regexp.MustCompile(v))
+						}
 					}
 				} else {
 					config.UserAgent.MustHave[svc] = values
