@@ -57,6 +57,7 @@ type CloudtrailEvent struct {
 	EventTime    string       `json:"eventTime"`
 	EventSource  string       `json:"eventSource"`
 	EventName    string       `json:"eventName"`
+	EventId      string       `json:"eventID"`
 	AWSRegion    string       `json:"awsRegion"`
 	EventType    string       `json:"eventType"`
 	ReadOnly     bool         `json:"readOnly"`

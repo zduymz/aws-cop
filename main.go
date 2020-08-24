@@ -54,10 +54,14 @@ func HandleRequest(ctx context.Context, e events.S3Event) {
 				actor = "root"
 			case "FederatedUser":
 				actor = event.UserIdentity.SessionContext.SessionIssuer.UserName
-			case "AWSService":
-				actor = event.UserIdentity.InvokedBy
 			case "AWSAccount":
 				actor = event.UserIdentity.AccountId
+			case "AWSService":
+				actor = event.UserIdentity.InvokedBy
+				// ingore api call by aws service
+				continue
+			default:
+				actor = "unknown"
 			}
 
 			if config.checkWhiteListUserIdentity(event.EventSource, actor) {
@@ -65,7 +69,7 @@ func HandleRequest(ctx context.Context, e events.S3Event) {
 			}
 
 			if config.checkBlacklistUseragent(event.EventSource, event.UserAgent) {
-				tickets = append(tickets, fmt.Sprintf("[%s] %s - %s - %s - %s", event.EventTime, actor, event.EventName, event.EventSource, event.UserAgent))
+				tickets = append(tickets, fmt.Sprintf("[%s] %s - %s - %s - %s", event.EventTime, actor, event.EventName, event.EventSource, event.EventId))
 			}
 
 			// log to cloudwatch for improving
