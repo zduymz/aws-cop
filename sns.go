@@ -23,7 +23,7 @@ type Slack struct {
 
 func (s *Slack) Write(msg string) error {
 	if s.DryRun {
-		log.Println(msg)
+		log.Printf("\n---------\n%s\n---------\n",msg)
 		return nil
 	}
 

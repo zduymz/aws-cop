@@ -9,29 +9,42 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func inSlice(x string, xs []string) bool {
-	for _, v := range xs {
-		if x == v {
-			return true
-		}
-	}
-	return false
-}
-
 var (
 	downloader Downloader
 	slack      Slack
+	//db         *dynamodb.DynamoDB
+	//dynamodbTable string
 )
 
 func HandleRequest(ctx context.Context, e events.S3Event) {
 	config := ReadEnv()
-
+	lc, _ := lambdacontext.FromContext(ctx)
+	log.Printf("Handler start: %s - records len: %d", lc.AwsRequestID, len(e.Records))
 	for _, r := range e.Records {
+
+		//lock, _ := dynamodbattribute.MarshalMap(DynamodbLock{
+		//	Key: r.S3.Object.Key,
+		//})
+		//if _, err := db.PutItem(&dynamodb.PutItemInput{
+		//	ConditionExpression: aws.String("attribute_not_exists(id)"),
+		//	TableName:           aws.String("lambda-cloudtrail-watcher"),
+		//	Item:                lock,
+		//}); err != nil {
+		//	if err.(awserr.Error).Code() == dynamodb.ErrCodeConditionalCheckFailedException {
+		//		log.Println("passed")
+		//		continue
+		//	}
+		//	log.Printf("failed to write to dynamodb. Reason: %v", err)
+		//	continue
+		//}
+
+		log.Printf("begin processing: %s/%s", r.S3.Bucket.Name, r.S3.Object.Key)
 		var tickets []string
 		trail, err := downloader.Get(r.S3.Bucket.Name, r.S3.Object.Key)
 		if err != nil {
@@ -69,7 +82,7 @@ func HandleRequest(ctx context.Context, e events.S3Event) {
 			}
 
 			if config.checkBlacklistUseragent(event.EventSource, event.UserAgent) {
-				tickets = append(tickets, fmt.Sprintf("[%s] %s - %s - %s - %s", event.EventTime, actor, event.EventName, event.EventSource, event.EventId))
+				tickets = append(tickets, fmt.Sprintf("[%s] %s - %s - %s - %s", event.EventTime, actor, event.EventName, strings.TrimSuffix(event.EventSource, ".amazonaws.com"), event.EventId))
 			}
 
 			// log to cloudwatch for improving
@@ -82,7 +95,7 @@ func HandleRequest(ctx context.Context, e events.S3Event) {
 		end := len(tickets)
 		for i, ticket := range tickets {
 			count = count + len(ticket)
-			end = i + 1
+			end = i
 			if count > SlackMessageSizeLimit {
 				if err := slack.Write(strings.Join(tickets[begin:end], "\n")); err != nil {
 					log.Printf("failed to send slack. Reason: %v", err)
@@ -93,7 +106,7 @@ func HandleRequest(ctx context.Context, e events.S3Event) {
 		}
 
 		if begin < end {
-			if err := slack.Write(strings.Join(tickets[begin:end], "\n")); err != nil {
+			if err := slack.Write(strings.Join(tickets[begin:], "\n")); err != nil {
 				log.Printf("failed to send slack. Reason: %v", err)
 			}
 		}
@@ -117,6 +130,8 @@ func init() {
 		WebHookUrl: url,
 		DryRun:     !ok,
 	}
+
+	//db = dynamodb.New(sess)
 
 	//if _, ok := os.LookupEnv("DEBUG"); !ok {
 	//	log.SetOutput(ioutil.Discard)

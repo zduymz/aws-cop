@@ -73,6 +73,10 @@ type Downloader struct {
 	*s3manager.Downloader
 }
 
+type DynamodbLock struct {
+	Key string `json:"id"`
+}
+
 type ConfigUserIdentity struct {
 	Ignores map[string][]string
 }
